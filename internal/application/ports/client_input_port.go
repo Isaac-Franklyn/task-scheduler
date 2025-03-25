@@ -5,5 +5,5 @@ import (
 )
 
 type InputService interface {
-	GetTaskFromClient() (domain.Task, error)
+	GetTaskFromClient() (*domain.Task, error)
 }

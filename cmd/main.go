@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Isaac-Franklyn/task-scheduler/internal/application/adapters"
+	leadercluster "github.com/Isaac-Franklyn/task-scheduler/internal/application/core/LeaderCluster"
 	"github.com/Isaac-Franklyn/task-scheduler/internal/application/core/api"
 	"github.com/gin-gonic/gin"
 )
@@ -12,16 +13,22 @@ import (
 func main() {
 	r := gin.Default()
 
+	//start a raft cluster
+	raftCluster := leadercluster.NewRaftCluster(5)
+	raftCluster.StartCluster()
+
+	//start a api gateway
+	APIGateway := api.NewAPIGateway()
+
 	r.POST("/task", func(c *gin.Context) {
 
 		newHTTPAdapter := adapters.NewHTTPInputAdapter(c)
-		newAPIgateway := api.NewAPIGateway(newHTTPAdapter)
 
-		if err := newAPIgateway.ValidateTask(); err != nil {
+		err := APIGateway.NewInput(newHTTPAdapter)
+		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(), // or err.Error() for the exact string
+				"error": err.Error(),
 			})
-			return
 		}
 
 		c.JSON(200, gin.H{"message": "Task validated and submitted"})

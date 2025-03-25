@@ -15,14 +15,14 @@ func NewHTTPInputAdapter(c *gin.Context) *HTTPInputAdapter {
 	return &HTTPInputAdapter{Ctx: c}
 }
 
-func (Input *HTTPInputAdapter) GetTaskFromClient() (domain.Task, error) {
+func (Input *HTTPInputAdapter) GetTaskFromClient() (*domain.Task, error) {
 
 	var task domain.Task
 
 	if err := Input.Ctx.ShouldBindJSON(&task); err != nil {
 		Input.Ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
-		return domain.Task{}, nil
+		return &domain.Task{}, nil
 	}
 
-	return task, nil
+	return &task, nil
 }
