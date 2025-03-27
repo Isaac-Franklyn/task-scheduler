@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/Isaac-Franklyn/task-scheduler/internal/application/adapters"
-	leadercluster "github.com/Isaac-Franklyn/task-scheduler/internal/application/core/LeaderCluster"
-	"github.com/Isaac-Franklyn/task-scheduler/internal/application/core/api"
+	leadercluster "github.com/Isaac-Franklyn/task-scheduler/internal/application/core/coreapplication/LeaderCluster"
+	"github.com/Isaac-Franklyn/task-scheduler/internal/application/core/coreapplication/api"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +18,7 @@ func main() {
 	raftCluster.StartCluster()
 
 	//start a api gateway
-	APIGateway := api.NewAPIGateway()
+	APIGateway := api.NewAPIGateway(raftCluster)
 
 	r.POST("/task", func(c *gin.Context) {
 

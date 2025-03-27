@@ -5,18 +5,14 @@ import (
 	"log"
 	"time"
 
+	"github.com/Isaac-Franklyn/task-scheduler/internal/domain"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 )
 
-type Node struct {
-	ID   string
-	Raft *raft.Raft
-}
-
 type RaftCluster struct {
 	N       int // number of nodes to create
-	Cluster []*Node
+	Cluster []*domain.Node
 }
 
 func NewRaftCluster(n int) *RaftCluster {
@@ -36,7 +32,7 @@ func (raftcluster *RaftCluster) StartCluster() {
 	}
 }
 
-func createRaftNode(id, addr string) *Node {
+func createRaftNode(id, addr string) *domain.Node {
 	config := raft.DefaultConfig()
 	config.LocalID = raft.ServerID(id)
 
@@ -55,7 +51,7 @@ func createRaftNode(id, addr string) *Node {
 		log.Fatalf("Error creating snapshot store: %v", err)
 	}
 
-	node := &Node{ID: id}
+	node := &domain.Node{ID: id}
 
 	raftNode, err := raft.NewRaft(config, nil, store, store, snapshots, transport)
 	if err != nil {
@@ -66,7 +62,7 @@ func createRaftNode(id, addr string) *Node {
 	return node
 }
 
-func (raftcluster *RaftCluster) getLeader() (*Node, error) {
+func (raftcluster *RaftCluster) GetLeader() (*domain.Node, error) {
 
 	for _, node := range raftcluster.Cluster {
 		if node.Raft.State() == raft.Leader {
@@ -74,5 +70,5 @@ func (raftcluster *RaftCluster) getLeader() (*Node, error) {
 		}
 	}
 
-	return &Node{}, fmt.Errorf("no leader available")
+	return &domain.Node{}, fmt.Errorf("no leader available")
 }
