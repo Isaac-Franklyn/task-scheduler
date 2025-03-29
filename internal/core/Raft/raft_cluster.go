@@ -1,6 +1,7 @@
-package leadercluster
+package raft
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -71,4 +72,34 @@ func (raftcluster *RaftCluster) GetLeader() (*domain.Node, error) {
 	}
 
 	return &domain.Node{}, fmt.Errorf("no leader available")
+}
+
+func (raftcluster *RaftCluster) SendTaskToCluster(task *domain.Task) error {
+
+	node, err := raftcluster.GetLeader()
+	if err != nil {
+		return err
+	}
+
+	errchan := make(chan error)
+
+	go func(node *domain.Node, task *domain.Task) {
+		taskBytes, err := json.Marshal(task)
+		if err != nil {
+			errchan <- fmt.Errorf("failed to marshal the task")
+		}
+
+		future := node.Raft.Apply(taskBytes, time.Second*1)
+		if err := future.Error(); err != nil {
+			errchan <- fmt.Errorf("failed to apply task to raft log: %v", err)
+		}
+
+		errchan <- nil
+	}(node, task)
+
+	if err := <-errchan; err != nil {
+		return err
+	}
+
+	return nil
 }

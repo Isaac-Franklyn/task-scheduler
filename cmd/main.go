@@ -5,8 +5,9 @@ import (
 	"net/http"
 
 	"github.com/Isaac-Franklyn/task-scheduler/internal/application/adapters"
-	leadercluster "github.com/Isaac-Franklyn/task-scheduler/internal/application/core/coreapplication/LeaderCluster"
-	"github.com/Isaac-Franklyn/task-scheduler/internal/application/core/coreapplication/api"
+	api "github.com/Isaac-Franklyn/task-scheduler/internal/core/Api"
+	raft "github.com/Isaac-Franklyn/task-scheduler/internal/core/Raft"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,7 +15,7 @@ func main() {
 	r := gin.Default()
 
 	//start a raft cluster
-	raftCluster := leadercluster.NewRaftCluster(5)
+	raftCluster := raft.NewRaftCluster(5)
 	raftCluster.StartCluster()
 
 	//start a api gateway
@@ -22,9 +23,9 @@ func main() {
 
 	r.POST("/task", func(c *gin.Context) {
 
-		newHTTPAdapter := adapters.NewHTTPInputAdapter(c)
+		newHTTPAdapter := adapters.NewHTTPInputAdapter(c, APIGateway)
 
-		err := APIGateway.NewInput(newHTTPAdapter)
+		err := newHTTPAdapter.SendInputToApi()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),

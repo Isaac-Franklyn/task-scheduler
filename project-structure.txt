@@ -1,0 +1,23 @@
+.
+|-- README.md
+|-- cmd
+|   `-- main.go
+|-- go.mod
+|-- go.sum
+|-- internal
+|   |-- application
+|   |   |-- adapters
+|   |   |   `-- http_adapter.go
+|   |   `-- ports
+|   |       `-- api_input_port.go
+|   |-- core
+|   |   |-- Api
+|   |   |   `-- api.go
+|   |   `-- Raft
+|   |       |-- raft_cluster.go
+|   |       `-- raft_port.go
+|   `-- domain
+|       `-- models.go
+`-- project-structure.txt
+
+10 directories, 11 files
